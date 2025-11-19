@@ -3,6 +3,14 @@
         android:label="android_vehicle_tracking"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <!-- Add your Google Maps API key below -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyDSzBY8asu4HJheKHKa2CTA5IXXOMcqNp8"/>
+            <activity
+  android:name="com.yalantis.ucrop.UCropActivity"
+  android:screenOrientation="portrait"
+  android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
         <activity
             android:name=".MainActivity"
             android:exported="true"

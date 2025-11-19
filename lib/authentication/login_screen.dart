@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:android_vehicle_tracking/utils/colors.dart';
 import 'package:android_vehicle_tracking/utils/app_styles.dart';
+import 'package:android_vehicle_tracking/dashboard/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   static const routeName = '/login';
 
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -52,8 +53,11 @@ class _LoginScreenState extends State<LoginScreen> {
           backgroundColor: AppColors.successColor,
         ),
       );
-
-      // Navigator.of(context).pushReplacementNamed('/');
+      // Navigate to home screen
+      if (!mounted) return;
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (ctx) => HomeScreen()));
     } on FirebaseAuthException catch (e) {
       final message = _firebaseErrorMessage(e);
       if (!mounted) return;
@@ -78,8 +82,9 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       );
     } finally {
-      if (!mounted) return;
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
