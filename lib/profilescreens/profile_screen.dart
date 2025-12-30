@@ -1,6 +1,7 @@
 import 'dart:io';
-
+import 'package:android_vehicle_tracking/services/user_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -32,6 +33,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late final TextEditingController _fullNameController;
   late final TextEditingController _phoneController;
   late final TextEditingController _addressController;
+  final userService = UserService();
 
   File? _imageFile;
   final ImagePicker _picker = ImagePicker();
@@ -158,36 +160,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Future<String?> _uploadImageToFirebase() async {
-    // If user didn't pick a new image:
-    if (_imageFile == null) {
-      // If initial image is already a network URL, keep it.
-      if (widget.initialImagePath != null &&
-          widget.initialImagePath!.startsWith('http')) {
-        return widget.initialImagePath!;
-      }
-      return null;
-    }
+  // Future<String?> _uploadImageToFirebase() async {
+  //   // If user didn't pick a new image:
+  //   if (_imageFile == null) {
+  //     // If initial image is already a network URL, keep it.
+  //     if (widget.initialImagePath != null &&
+  //         widget.initialImagePath!.startsWith('http')) {
+  //       return widget.initialImagePath!;
+  //     }
+  //     return null;
+  //   }
 
-    try {
-      final filename =
-          '${DateTime.now().millisecondsSinceEpoch}_${widget.email.replaceAll(RegExp(r'[^a-zA-Z0-9_]'), '_')}.jpg';
-      final ref = FirebaseStorage.instance
-          .ref()
-          .child('profile_images')
-          .child(filename);
-      final uploadTask = ref.putFile(_imageFile!);
-      final snapshot = await uploadTask.whenComplete(() {});
-      final downloadUrl = await snapshot.ref.getDownloadURL();
-      return downloadUrl;
-    } catch (e) {
-      // If upload fails, show message and return null so profile can still be saved.
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Image upload failed: $e')));
-      return null;
-    }
-  }
+  //   try {
+  //     final filename =
+  //         '${DateTime.now().millisecondsSinceEpoch}_${widget.email.replaceAll(RegExp(r'[^a-zA-Z0-9_]'), '_')}.jpg';
+  //     final ref = FirebaseStorage.instance
+  //         .ref()
+  //         .child('profile_images')
+  //         .child(filename);
+  //     final uploadTask = ref.putFile(_imageFile!);
+  //     final snapshot = await uploadTask.whenComplete(() {});
+  //     final downloadUrl = await snapshot.ref.getDownloadURL();
+
+  //     return downloadUrl;
+  //   } catch (e) {
+  //     // If upload fails, show message and return null so profile can still be saved.
+  //     ScaffoldMessenger.of(
+  //       context,
+  //     ).showSnackBar(SnackBar(content: Text('Image upload failed: $e')));
+  //     return null;
+  //   }
+  // }
 
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) return;
@@ -196,32 +199,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     try {
       // 1) Upload image (if any) to Firebase Storage and get URL
-      final imageUrl = await _uploadImageToFirebase();
-
-      // 2) Prepare data
-      final updatedProfile = {
-        'fullName': _fullNameController.text.trim(),
-        'email': widget.email,
-        'phone': _phoneController.text.trim(),
-        'address': _addressController.text.trim(),
-        'imageUrl': imageUrl,
-        'updatedAt': FieldValue.serverTimestamp(),
-      };
-
-      // 3) Save to Firestore. Use email as document id (or replace with uid).
-      final docId = widget.email;
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(docId)
-          .set(updatedProfile, SetOptions(merge: true));
+      await userService.uploadProfileAndSave(
+        uid: FirebaseAuth.instance.currentUser!.uid,
+        fullName: _fullNameController.text.trim(),
+        email: widget.email.trim(),
+        phone: _phoneController.text.trim(),
+        address: _addressController.text.trim(),
+        imageFile: _imageFile!, // File object from image picker
+      );
+      ();
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Profile updated successfully')),
         );
-        Navigator.of(context).pop(updatedProfile);
+        // Navigator.of(context).pop(updatedProfile);
       }
     } catch (e) {
+      debugPrint('Error saving profile: $e');
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Failed to save profile: $e')));

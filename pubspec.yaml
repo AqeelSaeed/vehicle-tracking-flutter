@@ -42,6 +42,7 @@ dependencies:
   google_maps_flutter: ^2.14.0
   location: ^8.0.1
   image_cropper: ^11.0.0
+  supabase_flutter: ^2.12.0
 
 dev_dependencies:
   flutter_test:

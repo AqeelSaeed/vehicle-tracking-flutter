@@ -1,14 +1,20 @@
 import 'package:android_vehicle_tracking/authentication/forgot_password_screen.dart';
 import 'package:android_vehicle_tracking/authentication/login_screen.dart';
 import 'package:android_vehicle_tracking/splash_screen.dart';
+import 'package:android_vehicle_tracking/supbase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'authentication/signup_screen.dart';
 import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await Supabase.initialize(
+    url: SupbaseOptions.supabaseUrl,
+    anonKey: SupbaseOptions.supabaseAnonKey,
+  );
   runApp(const MyApp());
 }
 

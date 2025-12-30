@@ -61,7 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
-                        ProfileScreen(email: 'user@example.com'),
+                        ProfileScreen(email: 'aqeelsaeed15@gmail.com'),
                   ),
                 );
               },
@@ -84,6 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ? Center(child: CircularProgressIndicator())
           : GoogleMap(
               onMapCreated: _onMapCreated,
+              myLocationEnabled: true,
               initialCameraPosition: CameraPosition(
                 target: LatLng(
                   currentLocation!.latitude!,
